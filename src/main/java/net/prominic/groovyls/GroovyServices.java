@@ -468,6 +468,8 @@ public class GroovyServices implements TextDocumentService, WorkspaceService, La
 			compilationUnit.compile(Phases.CANONICALIZATION);
 		} catch (CompilationFailedException e) {
 			// ignore
+		} catch (CompilationFailedException e) {
+			// ignore
 		} catch (GroovyBugError e) {
 			System.err.println("Unexpected exception in language server when compiling Groovy.");
 			e.printStackTrace(System.err);
