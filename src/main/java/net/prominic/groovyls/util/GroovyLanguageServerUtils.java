@@ -47,9 +47,8 @@ public class GroovyLanguageServerUtils {
 		}
 
 		// LSP doesn't allow negative line numbers.
-		if (lspLine < 0) {
-			lspLine = 0;
-		}
+		lspLine = lspLine < 0 ? 0 : lspLine;
+		lspColumn = lspColumn < 0 ? 0 : lspColumn;
 
 		return new Position(lspLine, lspColumn);
 	}
