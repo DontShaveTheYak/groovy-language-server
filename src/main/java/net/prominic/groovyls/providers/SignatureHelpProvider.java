@@ -37,10 +37,13 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 
 import net.prominic.groovyls.compiler.ast.ASTNodeVisitor;
 import net.prominic.groovyls.compiler.util.GroovyASTUtils;
 import net.prominic.groovyls.util.GroovyLanguageServerUtils;
+import net.prominic.groovyls.util.GroovyDocUtils;
 import net.prominic.groovyls.util.GroovyNodeToStringUtils;
 
 public class SignatureHelpProvider {
@@ -50,11 +53,10 @@ public class SignatureHelpProvider {
 		this.ast = ast;
 	}
 
-	public CompletableFuture<SignatureHelp> provideSignatureHelp(TextDocumentIdentifier textDocument,
-			Position position) {
+	public CompletableFuture<SignatureHelp> provideSignatureHelp(TextDocumentIdentifier textDocument, Position position) {
 		if (ast == null) {
-			//this shouldn't happen, but let's avoid an exception if something
-			//goes terribly wrong.
+			// this shouldn't happen, but let's avoid an exception if something
+			// goes terribly wrong.
 			return CompletableFuture.completedFuture(new SignatureHelp(Collections.emptyList(), -1, -1));
 		}
 		URI uri = URI.create(textDocument.getUri());
@@ -87,6 +89,7 @@ public class SignatureHelpProvider {
 		for (MethodNode method : methods) {
 			List<ParameterInformation> parameters = new ArrayList<>();
 			Parameter[] methodParams = method.getParameters();
+
 			for (int i = 0; i < methodParams.length; i++) {
 				Parameter methodParam = methodParams[i];
 
@@ -94,8 +97,22 @@ public class SignatureHelpProvider {
 				paramInfo.setLabel(GroovyNodeToStringUtils.variableToString(methodParam, ast));
 				parameters.add(paramInfo);
 			}
+
+			final String MethodLabel = GroovyNodeToStringUtils.methodToString(method, ast);
+
+			final String docString = GroovyDocUtils.getDocString(method);
+
 			SignatureInformation sigInfo = new SignatureInformation();
-			sigInfo.setLabel(GroovyNodeToStringUtils.methodToString(method, ast));
+
+
+			if (docString != "") {
+				final MarkupContent contents = new MarkupContent();
+				contents.setKind(MarkupKind.MARKDOWN);
+				contents.setValue(docString);
+				sigInfo.setDocumentation(contents);
+			}
+
+			sigInfo.setLabel(MethodLabel);
 			sigInfo.setParameters(parameters);
 			sigInfos.add(sigInfo);
 		}
