@@ -2,15 +2,51 @@ package net.prominic.groovyls.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.IOException;
 
 import groovy.lang.groovydoc.Groovydoc;
 
 import org.codehaus.groovy.ast.AnnotatedNode;
+import org.codehaus.groovy.ast.ASTNode;
+import net.prominic.groovyls.groovydoc.GroovyDoc2MarkdownConverter;
 
 /**
  * Functions for retrieving and formatting GroovyDoc strings.
  */
 public class GroovyDocUtils {
+
+  /**
+   * Gets the Markdown formatted docString for a node, if the node doesn't have a
+   * docString then an empty String is returned.
+   *
+   * @param node The AST node to check for a docString.
+   * @return The docString or empty String.
+   */
+  public static String getDocString(final ASTNode node) {
+
+    String docString = "";
+
+    if (!(node instanceof AnnotatedNode)) {
+      return docString;
+    }
+
+    AnnotatedNode docNode = (AnnotatedNode) node;
+
+    final String rawDocString = getRawDocString(docNode);
+
+    if (rawDocString == "") {
+      return docString;
+    }
+
+    try {
+      docString = new GroovyDoc2MarkdownConverter(rawDocString).getAsString();
+    } catch (IOException e) {
+      System.err.println("Failed to convert docString to markdown: " + e.toString());
+    }
+
+    return docString;
+
+  }
 
   /**
    * Gets the raw docString for a node, if the node doesn't have a docString then
@@ -19,7 +55,7 @@ public class GroovyDocUtils {
    * @param node The AST node to check for a docString.
    * @return The docString or empty String.
    */
-  public static String getDocString(AnnotatedNode node) {
+  protected static String getRawDocString(AnnotatedNode node) {
 
     Groovydoc docstring = node.getGroovydoc();
     String content = "";
@@ -38,7 +74,7 @@ public class GroovyDocUtils {
    * @param text The commented block of text.
    * @return The content from inside the comment block.
    */
-  public static String removeComment(String text) {
+  protected static String removeComment(String text) {
 
     String result;
     Pattern pattern;
@@ -73,6 +109,24 @@ public class GroovyDocUtils {
 
     return result;
 
+  }
+
+  /**
+   * Wrap the supplied Groovy code in a markdown codeblock with
+   * Groovy syntax high lighting.
+   * <p>
+   * A newline will be appended to the end of the returned String.
+   * @param groovyCode The
+   * @return The markdown codeblock that ends with a newline.
+   */
+  public static String useGroovyHighlighting(final String groovyCode) {
+    final StringBuilder markdownContent = new StringBuilder();
+
+    markdownContent.append("```groovy\n");
+    markdownContent.append(groovyCode + "\n");
+    markdownContent.append("```\n");
+
+    return markdownContent.toString();
   }
 
 }

@@ -85,4 +85,14 @@ class GroovyDocUtilsTests {
 		Assertions.assertEquals(expected, docString);
 	}
 
+  @Test
+  void testUseGroovyHighLighting() {
+    final String groovyCode = "String test = 'test'";
+    final String expected = "```groovy\n" + groovyCode + "\n```\n";
+
+    final String result = GroovyDocUtils.useGroovyHighlighting(groovyCode);
+
+    Assertions.assertEquals(expected, result);
+  }
+
 }
