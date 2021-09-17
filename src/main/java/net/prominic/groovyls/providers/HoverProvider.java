@@ -19,6 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package net.prominic.groovyls.providers;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,6 +34,7 @@ import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
+import net.prominic.groovyls.groovydoc.GroovyDoc2MarkdownConverter;
 import net.prominic.groovyls.compiler.ast.ASTNodeVisitor;
 import net.prominic.groovyls.compiler.util.GroovyASTUtils;
 import net.prominic.groovyls.util.GroovyDocUtils;
@@ -74,17 +76,22 @@ public class HoverProvider {
 			return CompletableFuture.completedFuture(hover);
 		}
 
+		if (definitionNode instanceof AnnotatedNode) {
+			AnnotatedNode docNode = (AnnotatedNode) definitionNode;
+			final String rawDoc = GroovyDocUtils.getDocString(docNode);
+			String docString = "";
+
+			try {
+				docString = new GroovyDoc2MarkdownConverter(rawDoc).getAsString();
+			} catch (IOException e) {
+				System.err.println("Failed to convert docString to markdown: " + e.toString());
+			}
+
 		foundContent.append("```groovy\n");
 		foundContent.append(nodeSignature + "\n");
 		foundContent.append("```\n");
+		foundContent.append(docString);
 
-		if (definitionNode instanceof AnnotatedNode) {
-			AnnotatedNode docNode = (AnnotatedNode) definitionNode;
-			String docString = GroovyDocUtils.getDocString(docNode);
-			if (docString != null) {
-				foundContent.append(docString);
-			}
-			
 		}
 
 		contents.setValue(foundContent.toString());
