@@ -79,7 +79,6 @@ class FileContentsTrackerTests {
 		TextDocumentContentChangeEvent changeEvent = new TextDocumentContentChangeEvent();
 		changeEvent.setText(", friend");
 		changeEvent.setRange(new Range(new Position(0, 5), new Position(0, 11)));
-		changeEvent.setRangeLength(6);
 		changeParams.setContentChanges(Collections.singletonList(changeEvent));
 		tracker.didChange(changeParams);
 		Assertions.assertEquals("hello, friend", tracker.getContents(URI.create("file.txt")));
@@ -95,7 +94,6 @@ class FileContentsTrackerTests {
 		TextDocumentContentChangeEvent changeEvent = new TextDocumentContentChangeEvent();
 		changeEvent.setText("affles");
 		changeEvent.setRange(new Range(new Position(1, 1), new Position(1, 5)));
-		changeEvent.setRangeLength(4);
 		changeParams.setContentChanges(Collections.singletonList(changeEvent));
 		tracker.didChange(changeParams);
 		Assertions.assertEquals("hello\nwaffles", tracker.getContents(URI.create("file.txt")));

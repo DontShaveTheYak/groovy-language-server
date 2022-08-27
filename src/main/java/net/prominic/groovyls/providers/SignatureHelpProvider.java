@@ -39,7 +39,6 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import groovy.lang.groovydoc.Groovydoc;
 import net.prominic.groovyls.compiler.ast.ASTNodeVisitor;
